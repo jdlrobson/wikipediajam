@@ -86,7 +86,7 @@ async function mixWikipediaAudio(titles) {
 
     for (const title of titles) {
         // 1. Get images/files attached to the page
-        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&prop=images&titles=${encodeURIComponent(title)}&format=json&origin=*`;
+        const apiUrl = `https://en.wikipedia.org/w/api.php?action=query&limit=100&prop=images&titles=${encodeURIComponent(title)}&format=json&origin=*`;
         
         let audioFiles;
         if (apiRequestCache[apiUrl]) {
@@ -97,7 +97,7 @@ async function mixWikipediaAudio(titles) {
             const pageId = Object.keys(pages)[0];
             const images = pages[pageId].images;
             audioFiles = images ? images
-                .filter(img => /\.(ogg|oga|wav|mp3)$/i.test(img.title))
+                .filter(img => /\.(ogg|ogv|oga|wav|mp3)$/i.test(img.title))
                 .map(img => img.title)
                 : [];
             apiRequestCache[apiUrl] = audioFiles;
