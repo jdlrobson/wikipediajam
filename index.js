@@ -303,6 +303,45 @@ document.getElementById('suggestClick').addEventListener('click', async () => {
     renderSuggestionCards(pages);
 });
 
+
+const searcher = document.getElementById('searcher');
+const searcherList = document.getElementById('searcher-list');
+let searcherTimeout;
+let searcherSuggestions = [];
+
+function prependToInstruments(title) {
+    const textarea = document.getElementById('instruments');
+    const values = textarea.value.split('\n').map(line => line.trim()).filter(Boolean);
+    if (!values.includes(title)) {
+        textarea.value = [title, ...values].join('\n');
+        updateUrl();
+    }
+}
+
+searcher.addEventListener('input', () => {
+    clearTimeout(searcherTimeout);
+    const query = searcher.value.trim();
+    if (!query || query.length < 2) {
+        searcherList.innerHTML = '';
+        return;
+    }
+
+    if (searcherSuggestions.includes(query)) {
+        prependToInstruments(query);
+        searcher.value = '';
+        searcherList.innerHTML = '';
+        return;
+    }
+
+    searcherTimeout = setTimeout(async () => {
+        const apiUrl = `https://en.wikipedia.org/w/rest.php/v1/search/title?q=${encodeURIComponent(query)}&limit=10`;
+        const response = await fetch(apiUrl, { cache: 'no-store' }).then(res => res.json());
+        searcherSuggestions = response.pages?.map(page => page.title) || [];
+        searcherList.innerHTML = searcherSuggestions.map(title => `<option value="${title}"></option>`).join('');
+    }, 250);
+});
+
+
 document.getElementById('composition-title').addEventListener('input', ( ev ) => {
     document.querySelector('.cdx-card__text__title').textContent = ev.target.value;
     updateUrl();
