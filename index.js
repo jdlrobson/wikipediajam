@@ -326,19 +326,21 @@ searcher.addEventListener('input', () => {
         return;
     }
 
-    if (searcherSuggestions.includes(query)) {
-        prependToInstruments(query);
-        searcher.value = '';
-        searcherList.innerHTML = '';
-        return;
-    }
-
     searcherTimeout = setTimeout(async () => {
         const apiUrl = `https://en.wikipedia.org/w/rest.php/v1/search/title?q=${encodeURIComponent(query)}&limit=10`;
         const response = await fetch(apiUrl, { cache: 'no-store' }).then(res => res.json());
         searcherSuggestions = response.pages?.map(page => page.title) || [];
         searcherList.innerHTML = searcherSuggestions.map(title => `<option value="${title}"></option>`).join('');
     }, 250);
+});
+
+searcher.addEventListener('change', () => {
+    const selected = searcher.value.trim();
+    if (selected && searcherSuggestions.includes(selected)) {
+        prependToInstruments(selected);
+        searcher.value = '';
+        searcherList.innerHTML = '';
+    }
 });
 
 
