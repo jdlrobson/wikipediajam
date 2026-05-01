@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>WikipediaJam</title>
+        <link rel="stylesheet" href="./node_modules/@wikimedia/codex/dist/codex.style.css">
+        <style>
+            #instruments {
+                width: 100%;
+                height: 200px;
+            }
+            #jammer {
+                    margin-bottom: 50px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Let's make music with Wikipedia!</h1>
+        <p>Let's make music with Wikipedia! Pick some sounds you like and click "Jam!" to create your own composition.</p>
+        <div id="your-jam" style="display: none">
+            <h2>Your wikijam</h2>
+            <span class="cdx-card composition">
+                <!-- Card text. -->
+                <span class="cdx-card__text">
+                    <!-- Title. -->
+                    <span class="cdx-card__text__title composition-title">Untitled</span>
+                    <!-- Optional description. -->
+                    <span class="cdx-card__text__description">
+                        <audio controls download id="composition" />
+                        <a id="download-jam" style="display: none; margin-left: 10px;">Download</a>
+                    </span>
+                </span>
+                </span>
+        </div>
+        <h2>Make a wikijam</h2>
+        <p>Articles are the instruments.</p>
+        <form id="jammer">
+            <div class="cdx-text-input">
+                <!-- Input element with CSS class and attributes. -->
+                <input
+                    id="composition-title"
+                    class="cdx-text-input__input"
+                    type="text"
+                    placeholder="What is the name of your composition"
+                />
+            </div>
+            <div class="cdx-text-area">
+                <textarea id="instruments"
+                            class="cdx-text-area__textarea"
+                            placeholder="List titles separated by new line">
+List of unexplained sounds
+Football chant
+Wind chime
+American robin
+Also sprach Zarathustra
+                </textarea>
+                </div>
+            
+            <button class="cdx-button cdx-button--action-progressive">
+    Jam!
+  </button>
+        </form>
+        <button id="suggestClick" class="cdx-button">Suggest articles</button>
+        <div id="suggestions"></div>
+        <script src="index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@wikimedia/codex": "^2.5.1"
+  }
+}
