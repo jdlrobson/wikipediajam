@@ -25,7 +25,7 @@ async function isAudioFileSmallEnough(url) {
         });
         const length = response.headers.get('content-length');
         const bytes = length ? parseInt(length, 10) : 0;
-        return !bytes || bytes <= 1024 * 1024;
+        return !bytes || bytes <= 1024 * 1024 * 5;
     } catch (e) {
         console.warn('Could not determine audio file size for', url, e);
         return true;
