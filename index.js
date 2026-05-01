@@ -17,6 +17,21 @@ function saveApiCache() {
     }
 }
 
+async function isAudioFileSmallEnough(url) {
+    try {
+        const response = await fetch(url, {
+            method: 'HEAD',
+            cache: 'no-store'
+        });
+        const length = response.headers.get('content-length');
+        const bytes = length ? parseInt(length, 10) : 0;
+        return !bytes || bytes <= 1024 * 1024;
+    } catch (e) {
+        console.warn('Could not determine audio file size for', url, e);
+        return true;
+    }
+}
+
 // Convert AudioBuffer to WAV blob
 function audioBufferToWav(audioBuffer) {
     const numberOfChannels = audioBuffer.numberOfChannels;
@@ -104,6 +119,7 @@ async function mixWikipediaAudio(titles) {
             saveApiCache();
         }
 
+        const allowLargeAudio = document.getElementById('allow-large-audio')?.checked;
         const titleUrls = [];
         for (const fileTitle of audioFiles) {
             const fileInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileTitle)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
@@ -119,9 +135,11 @@ async function mixWikipediaAudio(titles) {
                 apiRequestCache[fileInfoUrl] = url;
                 saveApiCache();
             }
-            if (url) {
+            if (url && (allowLargeAudio || await isAudioFileSmallEnough(url))) {
                 audioUrls.push(url);
                 titleUrls.push(url);
+            } else if (url) {
+                console.log('ignore large audio file', url);
             }
         }
 
