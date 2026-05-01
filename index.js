@@ -80,6 +80,7 @@ function audioBufferToWav(audioBuffer) {
 async function mixWikipediaAudio(titles) {
     // Get the audio metadata first to calculate total duration
     const audioUrls = [];
+    const missingTitles = [];
 
     console.log("Searching for audio files...");
 
@@ -103,6 +104,7 @@ async function mixWikipediaAudio(titles) {
             saveApiCache();
         }
 
+        const titleUrls = [];
         for (const fileTitle of audioFiles) {
             const fileInfoUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileTitle)}&prop=imageinfo&iiprop=url&format=json&origin=*`;
             
@@ -117,13 +119,20 @@ async function mixWikipediaAudio(titles) {
                 apiRequestCache[fileInfoUrl] = url;
                 saveApiCache();
             }
-            if (url) audioUrls.push(url);
+            if (url) {
+                audioUrls.push(url);
+                titleUrls.push(url);
+            }
+        }
+
+        if (titleUrls.length === 0) {
+            missingTitles.push(title);
         }
     }
 
     if (audioUrls.length === 0) {
         console.log("No audio files found.");
-        return;
+        return { missingTitles };
     }
 
     console.log(`Found ${audioUrls.length} files. Mixing...`);
@@ -169,7 +178,7 @@ async function mixWikipediaAudio(titles) {
     // 5. Render the offline audio
     const renderedBuffer = await offlineContext.startRendering();
     
-    return { buffer: renderedBuffer, duration: maxDuration, sampleRate };
+    return { buffer: renderedBuffer, duration: maxDuration, sampleRate, missingTitles };
 }
 
 
@@ -195,7 +204,16 @@ const makeJam = async () => {
     const title = document.querySelector('#jammer input').value || 'Untitled Composition';
     document.querySelector('.composition-title').textContent = title;
     const result = await mixWikipediaAudio(titles);
-    if (result) {
+    const report = document.getElementById('no-audio-report');
+    if (result?.missingTitles?.length) {
+        report.style.display = 'block';
+        report.innerHTML = `The following Wikipedia articles didn't have associated audio files: ${result.missingTitles.map(title => `<a href="https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}" target="_blank" rel="noopener">${title}</a>`).join(' ')}`;
+    } else {
+        report.style.display = 'none';
+        report.textContent = '';
+    }
+
+    if (result?.buffer) {
         const { buffer, duration, sampleRate } = result;
         
         // Convert to WAV and create download link
@@ -213,9 +231,12 @@ const makeJam = async () => {
         // Also save to localStorage
         const reader = new FileReader();
         reader.readAsDataURL(wav);
+    } else {
+        document.getElementById('download-jam').style.display = 'none';
     }
+
     jam.textContent = 'Jam!';
-    document.getElementById('your-jam').style.display = 'block';
+    document.getElementById('your-jam').style.display = result?.buffer ? 'block' : 'none';
     updateUrl();
     jamming = false;
 };
